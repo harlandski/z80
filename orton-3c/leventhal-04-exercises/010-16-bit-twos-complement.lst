@@ -1,0 +1,18 @@
+# file opened: 010-16-bit-twos-complement.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000 3A 12 00     START   ld a,(INPUTLOW)
+ 4    0003 2F                   cpl
+ 5    0004 3C                   inc a
+ 6    0005 32 14 00             ld (OUTPUT),a
+ 7    0008 3A 13 00             ld a,(INPUTHIGH)
+ 8    000B 2F                   cpl
+ 9    000C CE 00                adc a,0
+10    000E 32 15 00             ld (OUTPUT+1),a
+11    0011 76                   HALT
+12    0012
+13    0012 00           INPUTLOW:       db $00
+14    0013 58           INPUTHIGH:      db $58
+15    0014              OUTPUT:
+16    0014
+# file closed: 010-16-bit-twos-complement.asm

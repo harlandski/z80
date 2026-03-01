@@ -1,0 +1,29 @@
+# file opened: d6.asm
+ 1    0000                      ORG 00
+ 2    0000 00                   NOP                 ; address 0 must be NOP
+ 3    0001
+ 4    0001 21 16 00     START:  LD   HL,SEED        ; HL points to seed byte
+ 5    0004 7E                   LD   A,(HL)         ; load current seed
+ 6    0005
+ 7    0005              ; --- Simple 8-bit LFSR step: A = (A >> 1) ^ (if LSB=1 then 0xB8) ---
+ 8    0005 1F                   RRA                 ; rotate right, LSB → Carry
+ 9    0006 30 02                JR   NC,NOXOR
+10    0008 EE B8                XOR  0B8H           ; taps for pseudo-random feedback
+11    000A              NOXOR:
+12    000A 77                   LD   (HL),A         ; store updated seed
+13    000B
+14    000B              ; --- Convert to range 1–6 ---
+15    000B E6 07                AND  00000111B      ; keep 3 bits (0–7)
+16    000D 3C                   INC  A              ; now 1–8
+17    000E FE 07                CP   7              ; if result is 7 or 8…
+18    0010 30 EF                JR   NC,START       ; …reject and generate again
+19    0012
+20    0012              ; --- Output result ---
+21    0012 D3 00        OUTPUT: OUT  (0),A          ; output roll (1–6)
+22    0014 18 FC                JR   OUTPUT          ; loop forever
+23    0016
+24    0016
+25    0016              ; --- User-provided seed ---
+26    0016 00           SEED:   DB 0              ; user enters seed here (0–255)
+27    0017
+# file closed: d6.asm

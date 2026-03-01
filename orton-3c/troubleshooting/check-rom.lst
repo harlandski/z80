@@ -1,0 +1,8 @@
+# file opened: check-rom.asm
+1     0000                      org 0
+2     0000
+3     0000 3A 63 41             ld a,($4163)
+4     0003 32 08 00             ld ($0008), a
+5     0006 76                   halt
+6     0007
+# file closed: check-rom.asm

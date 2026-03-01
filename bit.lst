@@ -1,0 +1,150 @@
+# file opened: bit.asm
+  1   0000                DEVICE ZXSPECTRUM48
+  2   0000
+  3   0000                org $8000
+  4   8000
+  5   8000 C3 24 80       jp start
+  6   8003
+  7   8003                ; ROM routines
+  8   8003              ROM_CLS   = $0DAF
+  9   8003              ROM_PRINT = $203C
+ 10   8003
+ 11   8003              header:
+ 12   8003 5B 20 20 20    db "[   A  ][   B  ][   C  ][ (HL) ]"
+ 12   8007 41 20 20 5D
+ 12   800B 5B 20 20 20
+ 12   800F 42 20 20 5D
+ 12   8013 5B 20 20 20
+ 12   8017 43 20 20 5D
+ 12   801B 5B 20 28 48
+ 12   801F 4C 29 20 5D
+ 13   8023
+ 14   8023              hlvar:
+ 15   8023 00             db 0
+ 16   8024
+ 17   8024              start:
+ 18   8024 D9             exx
+ 19   8025 E5             push hl   ; Preserve HL'
+ 20   8026
+ 21   8026                ; demo instructions rlca, rrca, rla, rra, cpl, and, xor, or, rrd, rld
+ 22   8026                ;                   rlc, rrc, rl, rr, sla, sra, sll, srl, bit, res, set
+ 23   8026
+ 24   8026 CD AF 0D       call ROM_CLS
+ 25   8029 11 03 80       ld de, header
+ 26   802C 01 20 00       ld bc, 32 ; This is the length of the string in "header" to print
+ 27   802F CD 3C 20       call ROM_PRINT
+ 28   8032
+ 29   8032                ; set initial register values
+ 30   8032 3E 6A          ld a, %01101010
+ 31   8034 06 95          ld b, %10010101
+ 32   8036 0E CC          ld c, %11001100
+ 33   8038 21 23 80       ld hl, hlvar
+ 34   803B 36 3C          ld (hl), %00111100
+ 35   803D
+ 36   803D CD A0 80       call binregs
+ 37   8040 0F             rrca ; rotates right and copies bit 0 into Carry and bit 7
+ 38   8041 0F             rrca ; see p. 209-210 of manual
+ 39   8042 CD A0 80       call binregs
+ 40   8045 CB 37          sll a ; this is undocumented - shifts one bit to left, filling 0 with 1
+ 41   8047 CB 27          sla a ; shifts left, moves 7 into carry, fills 0 with 0; 230-232 of manual
+ 42   8049 CD A0 80       call binregs
+ 43   804C CB 2F          sra a ; shifts right bit 0 into carry, bit 7 both shifted to bit 6 and put back into bit 7
+ 44   804E                      ; see p.  233 of manual for clear diagram
+ 45   804E CB 18          rr b  ; rotate right through the carry flag. 0 goes to carry; prev. carry goes to 7
+ 46   8050                      ; because bit 0 of b is 1 before the shift, this is shifted to carry
+ 47   8050 CB 19          rr c  ; and then shifted to bit 7 of c by this operation
+ 48   8052 CB 1E          rr (hl); as the right shift of c cleared the carry flag, bit 7 of (hl) is 0
+ 49   8054 CD A0 80       call binregs
+ 50   8057 B0             or b ; a OR b - only bit 7 will be clear
+ 51   8058 CD A0 80       call binregs
+ 52   805B A1             and c ; will clear any bits in A that are clear in C
+ 53   805C CD A0 80       call binregs
+ 54   805F AE             xor (hl); exclusive OR a with address hl points to
+ 55   8060 CD A0 80       call binregs
+ 56   8063 ED 6F          rld ; This is "rotate left decimal" - it works on the two nybbles in HL, and the right nybble in A
+ 57   8065                ; Before:
+ 58   8065                ;   A   = a_hi a_lo
+ 59   8065                ;  (HL)= h_hi h_lo
+ 60   8065
+ 61   8065                ; After RLD:
+ 62   8065                ;  A   = a_hi h_hi
+ 63   8065                ;  (HL)= h_lo a_lo
+ 64   8065 CD A0 80       call binregs
+ 65   8068 ED 67          rrd ; "rotate right decimal" - reverses the above
+ 66   806A CD A0 80       call binregs
+ 67   806D CB C7          set 0,a ; set the 0th (rightmost) bit in A
+ 68   806F CB 88          res 1,b ; reset the 1st (second from right) bit in B
+ 69   8071 CD A0 80       call binregs
+ 70   8074 2F             cpl ; inverts bits of A register (one's compliment)
+ 71   8075 CD A0 80       call binregs
+ 72   8078 37             scf
+ 73   8079              .bitloop
+ 74   8079 CB 11          rl c ; rotate c register left
+ 75   807B CD A0 80       call binregs
+ 76   807E CB 61          bit 4, c; check if bit 4 in the c register is set; this will take 2 iterations
+ 77   8080 CA 79 80       jp z,.bitloop
+ 78   8083
+ 79   8083                ;set colors
+ 80   8083 06 16          ld b,22   ; set color attribute for first 22 lines
+ 81   8085 21 00 58       ld hl,$5800 ; starting at the top
+ 82   8088              .rowloop:
+ 83   8088 16 00          ld d,0 ; first column (A) - black
+ 84   808A CD C8 80       call setcolor
+ 85   808D 14             inc d ; B = blue
+ 86   808E CD C8 80       call setcolor
+ 87   8091 14             inc d ; C = red
+ 88   8092 CD C8 80       call setcolor
+ 89   8095 14             inc d; (HL) = magenta
+ 90   8096 CD C8 80       call setcolor
+ 91   8099 05             dec b
+ 92   809A C2 88 80       jp nz,.rowloop
+ 93   809D
+ 94   809D E1             pop hl
+ 95   809E D9             exx
+ 96   809F C9             ret
+ 97   80A0
+ 98   80A0              binregs:    ; Prints A, B, C and (HL) in binary
+ 99   80A0 F5             push af   ; Preserve A on stack
+100   80A1 CD B2 80       call bina ; Print A
+101   80A4 78             ld a, b
+102   80A5 CD B2 80       call bina ; Print B
+103   80A8 79             ld a, c
+104   80A9 CD B2 80       call bina ; Print C
+105   80AC 7E             ld a, (hl)
+106   80AD CD B2 80       call bina ; Print (HL)
+107   80B0 F1             pop af    ; Restore A
+108   80B1 C9             ret
+109   80B2
+110   80B2              bina:       ; Prints A in binary
+111   80B2 C5             push bc   ; Preserve BC on stack
+112   80B3 06 08          ld b, 8   ; Loop for all 8 bits
+113   80B5              .bitloop:
+114   80B5 07             rlca      ; Shift high bit of A into carry bit
+115   80B6 4F             ld c,a    ; Preserve A in C
+116   80B7 38 05          jr c, .print1   ; Print "1" if carry bit set
+117   80B9 3E 30          ld a, $30 ; A = "0"; else print "0"
+118   80BB C3 C0 80       jp .next
+119   80BE              .print1:
+120   80BE 3E 31          ld a, $31 ; A = "1"
+121   80C0              .next:
+122   80C0 D7             rst $10
+123   80C1 79             ld a,c    ; Restore A
+124   80C2 05             dec b
+125   80C3 C2 B5 80       jp nz,.bitloop
+126   80C6 C1             pop BC    ; Restore BC
+127   80C7 C9             ret
+128   80C8
+129   80C8              setcolor: ; Input: D = new ink color; HL = color attribute address
+130   80C8 0E 08          ld c,8  ; loop for 8 color attributes
+131   80CA              .attrloop:
+132   80CA 7E             ld a,(hl); a = current color attribute (ink assumed to be black)
+133   80CB B2             or d ; A = A | D (set new ink color)
+134   80CC 77             ld (hl),a ; write back new color attribute
+135   80CD 23             inc hl ; next color attribute
+136   80CE 0D             dec c
+137   80CF C2 CA 80       jp nz,.attrloop
+138   80D2 C9             ret
+139   80D3
+140   80D3                SAVESNA "bit.sna", start
+141   80D3
+# file closed: bit.asm

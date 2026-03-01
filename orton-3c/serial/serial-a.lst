@@ -1,0 +1,9 @@
+# file opened: serial-a.asm
+1     0000                      org 1
+2     0001
+3     0001              PUTCH   =$400A
+4     0001 3E 41                LD A,'A'
+5     0003 CD 0A 40             CALL PUTCH
+6     0006 76                   HALT
+7     0007
+# file closed: serial-a.asm

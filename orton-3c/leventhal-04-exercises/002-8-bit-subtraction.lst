@@ -1,0 +1,16 @@
+# file opened: 002-8-bit-subtraction.asm
+ 1    0000              ; Subtract the contents of memory location x+1 from the contents of memory
+ 2    0000              ; location x. Place the result into memory location x+2
+ 3    0000
+ 4    0000                      org 0;
+ 5    0000
+ 6    0000 21 09 00     START:  ld HL,INPUT
+ 7    0003 7E                   ld a,(HL)
+ 8    0004 23                   inc HL
+ 9    0005 96                   sub (HL)
+10    0006 23                   inc HL
+11    0007 77                   ld (HL),a
+12    0008 76                   halt
+13    0009 77 39        INPUT:  db $77,$39
+14    000B
+# file closed: 002-8-bit-subtraction.asm

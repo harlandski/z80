@@ -1,0 +1,36 @@
+# file opened: beeploop.asm
+ 1    0000              ; makes a sound when the x key is pressed
+ 2    0000              ; version using a loop rather than .500 nop
+ 3    0000
+ 4    0000                DEVICE ZXSPECTRUM48
+ 5    0000
+ 6    0000                org $8000
+ 7    8000
+ 8    8000              start:
+ 9    8000 01 FE FE       ld bc,$FEFE ; in - keyboard SHIFT,ZXCV out: beeper
+10    8003 16 00          ld d,0 ; D = byte to output - toggled for beeper frequency
+11    8005              .keyloop:
+12    8005 ED 78          in a,(c) ; A = key states
+13    8007                ; bit 2,a  ; Check bit 2 (X key)
+14    8007                ; bit 1,a ; Check bit 1 (Z key)
+15    8007 CB 5F          bit 3,a ; Check bit 3 (C key)
+16    8009 C2 13 80       jp nz,.soundoff ; note the keystates are 1 by default, 0 if pressed
+17    800C 7A             ld a,d   ; A = last output byte
+18    800D EE 10          xor $10  ; flip bit 4
+19    800F 57             ld d,a   ; save new byte back to D
+20    8010 C3 15 80       jp .output
+21    8013              .soundoff:
+22    8013 3E 00          ld a,0  ; hold output to zero
+23    8015              .output:
+24    8015 ED 79          out (c), a ; output determined byte value
+25    8017 1E 64          ld e,100   ; loop counter - all previous registers in use
+26    8019              .beeploop:
+27    8019 00             nop
+28    801A 1D             dec e
+29    801B 20 FC          jr nz,.beeploop
+30    801D C3 05 80       jp .keyloop
+31    8020
+32    8020              ; Deployment snapshot
+33    8020                SAVESNA "beeploop.sna", start
+34    8020
+# file closed: beeploop.asm

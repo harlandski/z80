@@ -1,0 +1,38 @@
+434F                             ; Put character to console
+434F                             ; Character expected in A
+434F                             ; A15 bit banged by jumping between RAM images
+434F                             ; LD I,A instruction used to control A15 during refresh
+434F                             ; Uses A, B, C, D, HL
+434F   4F           PUTCH:    LD   C,A   ; Save character in C
+4350   16 0A                  LD   D,10   ; Send ten bits:
+4352   21 5A C3     L8:       LD   HL,L9+8000H   ;  0 bit - move to upper image
+4355   3E 80                  LD   A,80H
+4357   C3 FE 3F               JP   3FFEH   ;  Upper image execution: ***
+435A   06 1A        L9:       LD   B,26   ;   Wait one bit time
+435C   10 FE        L10:      DJNZ   L10
+435E   00                     NOP
+435F   00                     NOP
+4360   37                     SCF
+4361   CB 19                  RR   C
+4363   15                     DEC   D   ;   (No bit count test needed)
+4364   38 07                  JR   C,L12   ;   Next bit 0 - stay in upper image
+4366   06 02                  LD   B,2
+4368   10 FE        L11:      DJNZ   L11
+436A   00                     NOP
+436B   18 ED                  JR   L9
+436D   21 75 43     L12:      LD   HL,L13   ;  1 bit - move to lower image
+4370   3E 00                  LD   A,0
+4372   C3 FE 3F               JP   3FFEH   ;  Lower image execution: ***
+4375   06 1A        L13:      LD   B,26   ;   Wait one bit time
+4377   10 FE        L14:      DJNZ   L14
+4379   37                     SCF
+437A   CB 19                  RR   C
+437C   15                     DEC   D   ;   Test if all bits sent
+437D   C8                     RET   Z
+437E   00                     NOP
+437F   30 D1                  JR   NC,L8   ;   Next bit 1 - stay in lower image
+4381   06 02                  LD   B,2
+4383   10 FE        L15:      DJNZ   L15
+4385   00                     NOP
+4386   18 ED                  JR   L13
+4388                          .END      ; 

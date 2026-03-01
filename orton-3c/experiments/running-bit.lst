@@ -1,0 +1,18 @@
+# file opened: running-bit.asm
+ 1    0000              ; fill memory locations at end of program with a bit which
+ 2    0000              ; runs along from right to left 256 iterations
+ 3    0000
+ 4    0000                      org 0
+ 5    0000
+ 6    0000 21 0F 00     START:  ld hl,FREE
+ 7    0003 3E 01                ld a,$1
+ 8    0005 06 FF                ld b,$FF
+ 9    0007 77           LOOP:   ld (hl),a
+10    0008 8F                   adc a
+11    0009 23                   inc hl
+12    000A 05                   dec b
+13    000B C2 07 00             jp nz, LOOP
+14    000E 76                   halt
+15    000F              FREE:
+16    000F
+# file closed: running-bit.asm

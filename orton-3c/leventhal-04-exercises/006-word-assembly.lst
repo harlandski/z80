@@ -1,0 +1,20 @@
+# file opened: 006-word-assembly.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000 21 11 00     START:  ld HL,INPUT
+ 4    0003 7E                   ld a,(HL)
+ 5    0004 87                   add a
+ 6    0005 87                   add a
+ 7    0006 87                   add a
+ 8    0007 87                   add a
+ 9    0008 47                   ld b,a
+10    0009 23                   inc HL
+11    000A 7E                   ld a,(HL)
+12    000B E6 0F                and %00001111
+13    000D 80                   add b
+14    000E 23                   inc HL
+15    000F 77                   ld (HL),a
+16    0010 76                   halt
+17    0011 6A B3        INPUT   db $6a,$b3
+18    0013
+# file closed: 006-word-assembly.asm

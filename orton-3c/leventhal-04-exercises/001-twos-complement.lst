@@ -1,0 +1,17 @@
+# file opened: 001-twos-complement.asm
+ 1    0000              ; Place the twos complement of memory location X into memory
+ 2    0000              ; location X+1. The two's complement is the one's complement
+ 3    0000              ; plus one
+ 4    0000
+ 5    0000                      org 0
+ 6    0000
+ 7    0000 21 09 00     START:  ld HL,INPUT
+ 8    0003 7E                   ld a,(HL)
+ 9    0004 2F                   cpl
+10    0005 3C                   inc a
+11    0006 23                   inc hl
+12    0007 77                   ld (HL),a
+13    0008 76                   halt
+14    0009 AA           INPUT:  db %10101010 ; this is what you want the twos complement of
+15    000A
+# file closed: 001-twos-complement.asm

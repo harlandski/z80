@@ -1,0 +1,22 @@
+# file opened: putch.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000              PUTCH   = $400A
+ 4    0000
+ 5    0000 3E 0B        START:  LD A,LENGTH
+ 6    0002 47                   LD B,A
+ 7    0003 21 10 00             LD HL,HELLO
+ 8    0006 7E           LOOP    LD A,(HL)
+ 9    0007 E5                   PUSH HL
+10    0008 CD 0A 40             CALL PUTCH
+11    000B E1                   POP HL
+12    000C 23                   INC HL
+13    000D 10 F7                DJNZ LOOP
+14    000F 76                   HALT
+15    0010
+16    0010 48 65 6C 6C  HELLO   db "Hello World"
+16    0014 6F 20 57 6F
+16    0018 72 6C 64
+17    001B              LENGTH  = 11
+18    001B
+# file closed: putch.asm

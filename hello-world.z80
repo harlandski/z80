@@ -1,0 +1,23 @@
+
+	org 32000
+
+	jp start
+
+text:	db "Hello World"
+
+LENGTH: equ 11
+CLS:	equ $0daf
+
+start:
+	call CLS
+	ld hl, text
+	ld b, LENGTH
+loop:
+	ld a, (hl)
+	rst $10
+	inc hl
+	dec b
+	jr nz, loop
+        
+	ret	
+

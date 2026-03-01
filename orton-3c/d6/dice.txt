@@ -1,0 +1,36 @@
+; is it more than 128
+; or is bit 7 set
+; if so mask = %1111 1111
+; is it more than 64
+; or is bit 6 set
+; if so mask = %0111 1111
+; is it more than 32
+; if so mask = %0011 1111
+; is it more than 16
+; if so mask = %0001 1111
+; is it more than 8
+; if so mask = %0000 1111
+; is it more than 4
+; if so mask = %0000 0111
+; which is right for 6
+; is it more than 2
+; if so mask = %0000 0011
+; is it more than 1
+; if so mask = %0000 0001
+; is it zero
+; if so mask = %0000 0000
+
+; I think the order has to be reversed, it should check from least to most
+; significant bit, and the result will be the highest value
+
+; ld c,0
+; bit 0,a
+; if bit 0 is set, then change c to 1
+; otherwise, leave c as 0
+; bit 1,a
+; if bit 1 is set, then change c to 2
+; otherwise leave c as it is
+; etc.
+
+; so I think you want a jp z (jump if zero)
+;

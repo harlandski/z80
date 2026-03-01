@@ -1,0 +1,12 @@
+# file opened: 004-mask-least-sig-bits.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000 21 09 00     START:  ld HL,INPUT
+ 4    0003 7E                   ld a,(HL)
+ 5    0004 E6 F0                and %11110000
+ 6    0006 23                   inc HL
+ 7    0007 77                   ld (HL),a
+ 8    0008 76                   halt
+ 9    0009 C3           INPUT:  db $C3
+10    000A
+# file closed: 004-mask-least-sig-bits.asm

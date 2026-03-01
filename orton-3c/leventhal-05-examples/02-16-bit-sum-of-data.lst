@@ -1,0 +1,28 @@
+# file opened: 02-16-bit-sum-of-data.asm
+ 1    0000              ; Calculate sum of series of numbers
+ 2    0000              ; LENGTH of list - x+2
+ 3    0000              ; SERIES of numbers begins in x+3
+ 4    0000              ; LOWB byte of answer in x
+ 5    0000              ; HIGHB byte of answer in y
+ 6    0000                      org 0
+ 7    0000
+ 8    0000 21 16 00     START:  ld hl, LENGTH
+ 9    0003 46                   ld b,(hl)
+10    0004 97                   sub a ; LOWB = 0
+11    0005 4F                   ld c,a ; HIGHB = 0
+12    0006 23           DSUMD:  inc hl
+13    0007 86                   add a,(hl)
+14    0008 30 01                jr nc,CHCNT ; if carry flag not set, jump to next iteration
+15    000A 0C                   inc c; if carry flag set, increment HIGHB
+16    000B 10 F9        CHCNT:  djnz DSUMD
+17    000D 21 14 00             ld hl, LOWB
+18    0010 77                   ld (hl), a ; store LOWB
+19    0011 23                   inc hl
+20    0012 71                   ld (hl), c ; store HIGHB
+21    0013 76                   halt
+22    0014 00           LOWB:    db 0
+23    0015 00           HIGHB:   db 0
+24    0016 03           LENGTH: db 3
+25    0017 C8 FA 96     SERIES: db $c8, $fa, $96
+26    001A
+# file closed: 02-16-bit-sum-of-data.asm

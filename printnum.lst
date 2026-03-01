@@ -1,0 +1,28 @@
+# file opened: printnum.asm
+ 1    0000                DEVICE ZXSPECTRUM48
+ 2    0000
+ 3    0000                org 32000
+ 4    7D00
+ 5    7D00 C3 03 7D       jp start
+ 6    7D03
+ 7    7D03              CHAN_OPEN   = $1601
+ 8    7D03              STACK_BC    = $2D2B
+ 9    7D03              PRINT_FP    = $2DE3
+10    7D03              NUMBER      = 4242
+11    7D03
+12    7D03              start:
+13    7D03 3E 02          ld a,2
+14    7D05 CD 01 16       call CHAN_OPEN ; open screen channel
+15    7D08
+16    7D08 21 92 10       ld hl, NUMBER
+17    7D0B 44             ld b,h
+18    7D0C 4D             ld c,l
+19    7D0D
+20    7D0D CD 2B 2D       call STACK_BC ; push BC into FP as a small integer
+21    7D10 CD E3 2D       call PRINT_FP
+22    7D13
+23    7D13 C9             ret
+24    7D14
+25    7D14                SAVESNA "printnum.sna", start
+26    7D14
+# file closed: printnum.asm

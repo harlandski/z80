@@ -1,0 +1,10 @@
+# file opened: check-rom-ldir.asm
+1     0000                      org 0
+2     0000
+3     0000 21 4F 43             ld hl, $434F
+4     0003 11 10 00             ld de, $0010
+5     0006 01 00 01             ld bc, $0100
+6     0009 ED B0                ldir
+7     000B 76                   halt
+8     000C
+# file closed: check-rom-ldir.asm

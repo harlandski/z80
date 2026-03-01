@@ -1,0 +1,7 @@
+# file opened: 7fff.asm
+1     0000                      org 0
+2     0000 3A FF 7F             LD A,($7FFF)
+3     0003 32 10 00             LD ($10),A
+4     0006 76                   HALT
+5     0007
+# file closed: 7fff.asm

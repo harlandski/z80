@@ -1,0 +1,86 @@
+# file opened: arithmetic-episode-5.asm
+ 1    0000                DEVICE ZXSPECTRUM48
+ 2    0000
+ 3    0000                org $8000
+ 4    8000
+ 5    8000 C3 05 80       jp start
+ 6    8003
+ 7    8003              ENTER = $0D
+ 8    8003
+ 9    8003              scratch:
+10    8003 00 00          dw 0    ; 2 bytes of RAM for general temporary use
+11    8005                        ; dw is a synonym for WORD. It seems this means 16 bits.
+12    8005
+13    8005              start:
+14    8005 3E 10          ld a, $10
+15    8007 C6 02          add a, $02      ; A = $10 + $02 - clears all flags
+16    8009 21 56 34       ld hl, $3456
+17    800C CD 39 80       call print_afhl
+18    800F 16 0E          ld d, $0e
+19    8011 82             add a,d         ; A = $12 + $0E = $20, sets H
+20    8012 CD 39 80       call print_afhl
+21    8015 21 03 80       ld hl, scratch  ; HL = scratch address ($8003)
+22    8018 36 60          ld (hl), $60
+23    801A 86             add a, (hl)     ; A = $20 + $60 = $80, sets S and P/V
+24    801B CD 39 80       call print_afhl
+25    801E 84             add a,h         ; A = $80 + $80 = $00, sets Z, P/V and C
+26    801F CD 39 80       call print_afhl
+27    8022 3C             inc a
+28    8023 CD 39 80       call print_afhl
+29    8026 ED 44          neg
+30    8028 CD 39 80       call print_afhl
+31    802B 01 03 00       ld bc, $0003
+32    802E ED 42          sbc hl,bc       ; HL = $8003 - $0003 - 1 = $7FFF, sets H, P/V, and N
+33    8030 CD 39 80       call print_afhl
+34    8033 ED 62          sbc hl, hl      ; = $0, zet Z and N
+35    8035 CD 39 80       call print_afhl
+36    8038 C9             ret
+37    8039
+38    8039              print_afhl:
+39    8039 E5             push hl
+40    803A F5             push af
+41    803B CD 58 80       call print_hex
+42    803E ED 73 03 80    ld (scratch), sp
+43    8042 ED 4B 03 80    ld bc, (scratch)
+44    8046 0A             ld a,(bc)
+45    8047 CD 58 80       call print_hex
+46    804A 7C             ld a,h
+47    804B CD 58 80       call print_hex
+48    804E 7D             ld a,l
+49    804F CD 58 80       call print_hex
+50    8052 3E 0D          ld a, ENTER
+51    8054 D7             rst $10
+52    8055 F1             pop af
+53    8056 E1             pop hl
+54    8057 C9             ret
+55    8058
+56    8058              print_hex:
+57    8058 E5             push hl
+58    8059 F5             push af
+59    805A CB 3F          srl a
+60    805C CB 3F          srl a
+61    805E CB 3F          srl a
+62    8060 CB 3F          srl a
+63    8062 CD 6D 80       call print_hex_digit
+64    8065 F1             pop af
+65    8066 E6 0F          and $0F
+66    8068 CD 6D 80       call print_hex_digit
+67    806B E1             pop hl
+68    806C C9             ret
+69    806D
+70    806D              print_hex_digit:
+71    806D FE 0A          cp $0A
+72    806F F2 77 80       jp p,print_letter
+73    8072 F6 30          or $30
+74    8074 C3 79 80       jp print_char
+75    8077              print_letter:
+76    8077 C6 37          add $37
+77    8079              print_char:
+78    8079 D7             rst $10
+79    807A C9             ret
+80    807B
+81    807B              ; Deploymnet
+82    807B
+83    807B                SAVESNA "arith.sna", start
+84    807B
+# file closed: arithmetic-episode-5.asm

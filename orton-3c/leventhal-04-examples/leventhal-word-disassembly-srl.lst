@@ -1,0 +1,20 @@
+# file opened: leventhal-word-disassembly-srl.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000 21 15 00     START:  LD HL,END
+ 4    0003 7E                   LD A,(HL)
+ 5    0004 47                   LD B,A
+ 6    0005 CB 3F                SRL A
+ 7    0007 CB 3F                SRL A
+ 8    0009 CB 3F                SRL A
+ 9    000B CB 3F                SRL A
+10    000D 23                   INC HL
+11    000E 77                   LD (HL),A
+12    000F 78                   LD A,B
+13    0010 E6 0F                AND %00001111
+14    0012 23                   INC HL
+15    0013 77                   LD (HL),A
+16    0014 76                   HALT
+17    0015 7E           END:    db $7E ; This can be whatever you want to dissassemble
+18    0016
+# file closed: leventhal-word-disassembly-srl.asm

@@ -1,0 +1,10 @@
+# file opened: check-0th-switch.asm
+1     0000                      org 0
+2     0000
+3     0000 00           START:  nop
+4     0001 DB 00                in a,($00)
+5     0003 87                   add a
+6     0004 D3 00                out ($00),a
+7     0006 C3 00 00             jp START
+8     0009
+# file closed: check-0th-switch.asm

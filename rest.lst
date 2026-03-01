@@ -1,0 +1,87 @@
+# file opened: rest.asm
+ 1    0000                DEVICE ZXSPECTRUM48
+ 2    0000
+ 3    0000                org $8000
+ 4    8000
+ 5    8000              ENTER   = $0D
+ 6    8000
+ 7    8000              start:
+ 8    8000 D9             exx
+ 9    8001 E5             push hl ; preserve HL'
+10    8002
+11    8002 00             nop ; do nothing!
+12    8003
+13    8003 21 57 36       ld hl,$3657 ; load 3657 into HL as BCD
+14    8006 01 45 28       ld bc,$2845 ; load 2845 into HL as BCD
+15    8009 7D             ld a, l
+16    800A 81             add a, c ; add units and tens
+17    800B 27             daa ; do bcd adjustment
+18    800C 6F             ld l, a ; put answer back in l
+19    800D 7C             ld a, h
+20    800E 88             adc a,b ; add hundreds & thousands (with possible carry)
+21    800F 27             daa ; do bcd adjustment
+22    8010 67             ld h, a ; put answer back into h (HL = HL + BC (BCD))
+23    8011 CD 4B 80       call printhex ; print decimal digits in H (thousands, hundreds)
+24    8014 7D             ld a, l
+25    8015 CD 4B 80       call printhex; print decimal digits in L (tens, units)
+26    8018 3E 0D          ld a,ENTER
+27    801A D7             rst $10; print newline
+28    801B
+29    801B                ; find the first NOP in main routine
+30    801B 21 00 80       ld hl,start
+31    801E 01 4B 00       ld bc,printhex-start  ; stop searching after end of routine code
+32    8021 3E 00          ld a,0 ; a = NOP code
+33    8023 ED B1          cpir
+34    8025 2B             dec hl ; because of overshoot when you run cpir
+35    8026 7C             ld a,h ; upper byte of first NOP
+36    8027 CD 4B 80       call printhex ;
+37    802A 7D             ld a,l ; lower byte of first NOP
+38    802B CD 4B 80       call printhex;
+39    802E 3E 0D          ld a,ENTER
+40    8030 D7             rst $10
+41    8031
+42    8031                ; find the first NOP in the main routine
+43    8031 21 4A 80       ld hl, printhex-1 ; start with last byte
+44    8034 01 4B 00       ld bc, printhex-start ; stop searching at beginning
+45    8037 3E 00          ld a,0
+46    8039 ED B9          cpdr ; now search backwards
+47    803B 23             inc hl; as hl will overshoot this time in the other direction
+48    803C 7C             ld a,h
+49    803D CD 4B 80       call printhex
+50    8040 7D             ld a,l
+51    8041 CD 4B 80       call printhex
+52    8044 3E 0D          ld a,ENTER
+53    8046 D7             rst $10
+54    8047
+55    8047 00             nop ; the second nop to search for
+56    8048
+57    8048 E1             pop hl
+58    8049 D9             exx ; restore hl' to gracefully return to BASIC
+59    804A C9             ret
+60    804B
+61    804B              printhex: ; print A as hex byte
+62    804B F5             push af ; save full byte on stack
+63    804C CB 3F          srl a
+64    804E CB 3F          srl a
+65    8050 CB 3F          srl a
+66    8052 CB 3F          srl a; move upper nybble to lower spot
+67    8054 CD 5E 80       call printhex_digit
+68    8057 F1             pop af
+69    8058 E6 0F          and $0F
+70    805A CD 5E 80       call printhex_digit
+71    805D C9             ret
+72    805E
+73    805E              printhex_digit:
+74    805E FE 0A          cp $0A
+75    8060 F2 68 80       jp p,print_letter
+76    8063 F6 30          or $30
+77    8065 C3 6A 80       jp print_character
+78    8068              print_letter:
+79    8068 C6 25          add a,37
+80    806A              print_character:
+81    806A D7             rst $10
+82    806B C9             ret
+83    806C
+84    806C                SAVESNA "rest.sna", start
+85    806C
+# file closed: rest.asm

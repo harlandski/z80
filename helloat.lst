@@ -1,0 +1,50 @@
+# file opened: helloat.asm
+ 1    0000              ; Practising with "Print AT" using the character code method
+ 2    0000
+ 3    0000                DEVICE ZXSPECTRUM48
+ 4    0000
+ 5    0000                org $8000
+ 6    8000
+ 7    8000 C3 12 80       jp start
+ 8    8003
+ 9    8003              ROM_CLS       = $0DAF
+10    8003              ROM_PRINT     = $203C
+11    8003              CHAN_OPEN     = $1601
+12    8003              AT            = 22
+13    8003              ROW           = 11
+14    8003              COL           = 9
+15    8003              UPPER_SCREEN  = 2
+16    8003              ; LENGTH      = 13 is another (better?) way of solving the length thing
+17    8003              string:
+18    8003 48 65 6C 6C    db "Hello, World!"
+18    8007 6F 2C 20 57
+18    800B 6F 72 6C 64
+18    800F 21
+19    8010
+20    8010              length:
+21    8010 0D 00          dw 13 ; This needs to be a word, not just a byte
+22    8012                ; when I had db 13 I got garbage afer "Hello World"
+23    8012
+24    8012              start:
+25    8012              ; Open the screen channel
+26    8012 CD AF 0D       call ROM_CLS
+27    8015 3E 02          ld a, UPPER_SCREEN
+28    8017 CD 01 16       call CHAN_OPEN
+29    801A
+30    801A              ; Position cursor
+31    801A 3E 16          ld a, AT
+32    801C D7             rst $10
+33    801D 3E 0B          ld a, ROW
+34    801F D7             rst $10
+35    8020 3E 09          ld a, COL
+36    8022 D7             rst $10
+37    8023
+38    8023              ;print
+39    8023 11 03 80       ld de,string
+40    8026 ED 4B 10 80    ld bc,(length) ; expects two bytes
+41    802A CD 3C 20       call ROM_PRINT
+42    802D C9             ret
+43    802E
+44    802E                SAVESNA "helloat.sna", start
+45    802E
+# file closed: helloat.asm

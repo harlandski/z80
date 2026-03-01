@@ -1,0 +1,79 @@
+# file opened: conditions-ep4.asm
+ 1    0000              	DEVICE ZXSPECTRUM48
+ 2    0000
+ 3    0000              	org $8000
+ 4    8000
+ 5    8000 C3 17 80     	jp start
+ 6    8003
+ 7    8003              ; Character codes
+ 8    8003              ENTER	= $0D
+ 9    8003              UPPER_A = $41
+10    8003              UPPER_Z = $5A
+11    8003              LOWER_A = $61
+12    8003              LOWER_Z = $7A
+13    8003
+14    8003              message:
+15    8003 4C 69 6B 65  	db "Like and subscribe!",ENTER
+15    8007 20 61 6E 64
+15    800B 20 73 75 62
+15    800F 73 63 72 69
+15    8013 62 65 21 0D
+16    8017
+17    8017              MSG_LEN = $ - message ; macro $ refers to current line, minus start of message, gets length
+18    8017
+19    8017              start:
+20    8017              	;print original message
+21    8017 21 03 80     	ld hl, message
+22    801A 06 14        	ld b, MSG_LEN
+23    801C              orig_loop:
+24    801C 7E           	ld a, (hl)
+25    801D D7           	rst $10
+26    801E 23           	inc hl
+27    801F 10 FB        	djnz orig_loop
+28    8021
+29    8021              	; Print all lowercase
+30    8021 21 03 80     	ld hl, message
+31    8024 7E           	ld a,(hl)
+32    8025              lower_loop:
+33    8025 FE 41        	cp UPPER_A ; As far as I can see, this is to catch enter $0D and space 20
+34    8027 38 05        	jr c,print_lower_char ; if A(ccumulator) < UPPER_A, then jump
+35    8029 FE 5B        	cp UPPER_Z+1 ; is this +1 a macro? I wonder what this looks like in code. Confirmed.
+36    802B DC 44 80     	call c,tolower; So this is calling the tolower subroutine if A <= UPPER_Z, but excluding printable characters
+37    802E              print_lower_char:
+38    802E D7           	rst $10
+39    802F 23           	inc hl
+40    8030 7E           	ld a,(hl)
+41    8031 FE 0D        	cp ENTER
+42    8033 20 F0        	jr nz,lower_loop; If it's not ENTER, orig_loop
+43    8035 D7           	rst $10; if it is ENTER, print it
+44    8036              ; print as all uppercase
+45    8036 21 03 80     	ld hl, message
+46    8039 06 14        	ld b,MSG_LEN
+47    803B              upper_loop:
+48    803B 7E           	ld a,(hl)
+49    803C CD 47 80     	call toupper
+50    803F D7           	rst $10
+51    8040 23           	inc hl
+52    8041 10 F8        	djnz upper_loop
+53    8043
+54    8043              	;all done
+55    8043
+56    8043 C9           	ret
+57    8044
+58    8044              tolower:
+59    8044 C6 20        	add $20; I think this is an abbreviation for add a,$20. Confirmed
+60    8046 C9           	ret
+61    8047
+62    8047              toupper:
+63    8047 FE 61        	cp LOWER_A; if the character is a non-printable character or upper lowercase
+64    8049 D8           	ret c; then get outta here
+65    804A FE 7B        	cp LOWER_Z+1; if for some reason the character is greater than lower case Z
+66    804C D0           	ret nc; then get outta here
+67    804D D6 20        	sub $20
+68    804F C9           	ret
+69    8050
+70    8050
+71    8050
+72    8050              	SAVESNA "conditionals-ep4.sna", start
+73    8050
+# file closed: conditions-ep4.asm

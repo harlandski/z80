@@ -1,0 +1,226 @@
+0000                             ; Jump table
+0000                             ; A static list of routines to jump to. If you add a routine,
+0000                             ; please add it to the jump list.
+0000                             ; If you need to move a routine, please ensure the jump list
+0000                             ; still calls that routine.
+0000                             ; If you write anything that calls a routine, please call it
+0000                             ; from the jump table in case the routine location changes.
+4000                          .ORG   0x4000   ;Jump table start
+4000   C3 03 43               JP   L0   ; Serial Echo by Karen Outen
+4003   C3 00 41               JP   SPINIT   ; Set up stack pointer and other stuff for serial
+4006   CD 26 43               CALL   GETCH   ; Get a character from serial and put it in A
+4009   C9                     RET      
+400A   CD 4F 43               CALL   PUTCH   ; Take the character in A and put it out on serial
+400D   C9                     RET      
+400E   C3 41 41               JP   IOECHO   ; read Port A input and output it to Port A
+4011   C3 50 41               JP   ROTLEFT   ; Rotate the Port 0 switch left continously
+4014   C3 63 41               JP   CLEARRAM   ; Set all RAM to 0x00
+4017                             ; Reat the switches on port 0 and display them on port 0
+4017                             ; This runs forever
+4017                             ; Uses A regiser
+4141                          .ORG   0x4141   
+4141                IOECHO:      
+4141   DB 00                  IN   A,($00)   
+4143   00                     NOP      
+4144   D3 00                  OUT   ($00),A   
+4146   C3 41 41               JP   IOECHO   
+4149                             ; Take an initial reading of the switches on port 0. Display
+4149                             ; them on the LEDs on port 0. Wait a moment, and rotate the
+4149                             ; LEDs to the left. Continue to wait and rotate forever
+4149                             ; Uses A, HL
+4150                          .ORG   0x4150   
+4150                ROTLEFT:      
+4150   DB 00                  IN   A,($00)   
+4152                ROTLLOOP:      
+4152   D3 00                  OUT   $00,A   
+4154   17                     RLA      
+4155   21 FF FF               LD   HL,$FFFF   
+4158                ROTLDELAY:      
+4158   25                     DEC   H   
+4159   C2 58 41               JP   NZ,ROTLDELAY   
+415C   2D                     DEC   L   
+415D   C2 58 41               JP   NZ,ROTLDELAY   
+4160   C3 52 41               JP   ROTLLOOP   
+4163                             ; Loop to clear all RAM to 0x00 then HALT
+4163                             ; Can be called by setting a to a value that you want RAM to
+4163                             ; be set to, and HL to the high value of RAM by calling CLRAMLOOP
+4163                             ; Uses A, HL
+4163                CLEARRAM:      
+4163   3E 00                  LD   A,00   
+4165   21 20 00               LD   HL,$20   
+4168                CLRAMLOOP:      
+4168   77                     LD   (HL),a   
+4169   23                     INC   HL   
+416A   C2 68 41               JP   NZ,CLRAMLOOP   
+416D   76                     HALT      
+416E                             ; The stack pointer initilisation and placing commands in
+416E                             ; RAM that Karen Orten set up, except with a HALT to allow
+416E                             ; calling individual GETCH and PUTCH to be called
+4100                          .ORG   0x4100   
+4100   31 FE 3F     SPINIT:   LD   SP,3FFEH   ; Stack pointer near RAM top ***
+4103   21 33 33               LD   HL,3333H   ; Put INC SP instructions
+4106   22 38 00               LD   (38H),HL   ;  at 38H, 39H
+4109   3E E9                  LD   A,0E9H   ; Put a JP (HL) instruction
+410B   32 3A 00               LD   (3AH),A   ;  at 3AH
+410E   21 ED 47               LD   HL,47EDH   ; Put a LD I,A instruction
+4111   22 FE 3F               LD   (3FFEH),HL   ;  at 7FFEH/FFFEH ***
+4114   3E E9                  LD   A,0E9H   ; Put a JP (HL) instruction
+4116   32 00 00               LD   (0),A   ;  at 0000H/8000H
+4119   ED 56                  IM   1   ; Select interrupt mode 1
+411B   76                     HALT      
+411C                             ; *** The code below is unmodified from Karen Outens code
+411C                             ; *** except for the .ORG 4303 and other address lines marked
+411C                             ; *** with *** to allow to run from ROM
+411C                             ; Orton Z80 computer simple echo program
+411C                             ; Uses interrupt mode 1 (restart at 38H)
+411C                             ; Serial drivers timed for 9600 baud, no parity, one stop bit
+411C                             ; Intended to be basis of future loader and driver for MS Basic
+411C                             ; Jump at reset entry point
+0000                          .ORG   0000H   
+0000   C3 03 43               JP   L0   ; NB. This instruction gets
+0003                             ;				;  over-written!
+0003                             ; Initialisation
+4303                          .ORG   4303H   
+4303   31 FE 3F     L0:       LD   SP,3FFEH   ; Stack pointer near RAM top ***
+4306   21 33 33               LD   HL,3333H   ; Put INC SP instructions
+4309   22 38 00               LD   (38H),HL   ;  at 38H, 39H
+430C   3E E9                  LD   A,0E9H   ; Put a JP (HL) instruction
+430E   32 3A 00               LD   (3AH),A   ;  at 3AH
+4311   21 ED 47               LD   HL,47EDH   ; Put a LD I,A instruction
+4314   22 FE 3F               LD   (3FFEH),HL   ;  at 7FFEH/FFFEH ***
+4317   3E E9                  LD   A,0E9H   ; Put a JP (HL) instruction
+4319   32 00 00               LD   (0),A   ;  at 0000H/8000H
+431C   ED 56                  IM   1   ; Select interrupt mode 1
+431E                             ; Main loop
+431E   CD 26 43     L1:       CALL   GETCH   
+4321   CD 4F 43               CALL   PUTCH   
+4324   18 F8                  JR   L1   
+4326                             ; Get character from console
+4326                             ; Character returned in A
+4326                             ; Service routine at 38H discards pushed PC and jumps to (HL)
+4326                             ; Uses A, B, C, HL
+4326   21 29 43     GETCH:    LD   HL,L2   ; Wait for start bit
+4329   FB           L2:       EI      
+432A   00                     NOP      
+432B   F3                     DI      
+432C   01 09 0D               LD   BC,0D09H   ; Wait half a bit time
+432F   10 FE        L3:       DJNZ   L3   
+4331   FB                     EI      ; Check still there
+4332   00                     NOP      
+4333   F3                     DI      
+4334   21 49 43               LD   HL,L7   ; Shift in 9 bits:
+4337   06 03                  LD   B,3   
+4339   10 FE        L4:       DJNZ   L4   
+433B   06 1B        L5:       LD   B,27   ;  Wait whole bit time
+433D   10 FE        L6:       DJNZ   L6   
+433F   37                     SCF      
+4340   FB                     EI      
+4341   00                     NOP      
+4342   F3                     DI      
+4343   3F                     CCF      
+4344   ED 4F                  LD   R,A   ;  (just killing time here)
+4346   00                     NOP      
+4347   00                     NOP      
+4348   00                     NOP      
+4349   1F           L7:       RRA      ;  Shift in bit
+434A   0D                     DEC   C   
+434B   20 EE                  JR   NZ,L5   
+434D   17                     RLA      ; Recover bit 0
+434E   C9                     RET      
+434F                             ; Put character to console
+434F                             ; Character expected in A
+434F                             ; A15 bit banged by jumping between RAM images
+434F                             ; LD I,A instruction used to control A15 during refresh
+434F                             ; Uses A, B, C, D, HL
+434F   4F           PUTCH:    LD   C,A   ; Save character in C
+4350   16 0A                  LD   D,10   ; Send ten bits:
+4352   21 5A C3     L8:       LD   HL,L9+8000H   ;  0 bit - move to upper image
+4355   3E 80                  LD   A,80H   
+4357   C3 FE 3F               JP   3FFEH   ;  Upper image execution: ***
+435A   06 1A        L9:       LD   B,26   ;   Wait one bit time
+435C   10 FE        L10:      DJNZ   L10   
+435E   00                     NOP      
+435F   00                     NOP      
+4360   37                     SCF      
+4361   CB 19                  RR   C   
+4363   15                     DEC   D   ;   (No bit count test needed)
+4364   38 07                  JR   C,L12   ;   Next bit 0 - stay in upper image
+4366   06 02                  LD   B,2   
+4368   10 FE        L11:      DJNZ   L11   
+436A   00                     NOP      
+436B   18 ED                  JR   L9   
+436D   21 75 43     L12:      LD   HL,L13   ;  1 bit - move to lower image
+4370   3E 00                  LD   A,0   
+4372   C3 FE 3F               JP   3FFEH   ;  Lower image execution: ***
+4375   06 1A        L13:      LD   B,26   ;   Wait one bit time
+4377   10 FE        L14:      DJNZ   L14   
+4379   37                     SCF      
+437A   CB 19                  RR   C   
+437C   15                     DEC   D   ;   Test if all bits sent
+437D   C8                     RET   Z   
+437E   00                     NOP      
+437F   30 D1                  JR   NC,L8   ;   Next bit 1 - stay in lower image
+4381   06 02                  LD   B,2   
+4383   10 FE        L15:      DJNZ   L15   
+4385   00                     NOP      
+4386   18 ED                  JR   L13   
+4388                          .END      ; 
+
+
+IOECHO:             4141 DEFINED AT LINE 28
+                    > USED AT LINE 17
+                    > USED AT LINE 32
+ROTLEFT:            4150 DEFINED AT LINE 39
+                    > USED AT LINE 18
+ROTLLOOP:           4152 DEFINED AT LINE 41
+                    > USED AT LINE 50
+ROTLDELAY:          4158 DEFINED AT LINE 45
+                    > USED AT LINE 47
+                    > USED AT LINE 49
+CLEARRAM:           4163 DEFINED AT LINE 58
+                    > USED AT LINE 19
+CLRAMLOOP:          4168 DEFINED AT LINE 61
+                    > USED AT LINE 64
+SPINIT:             4100 DEFINED AT LINE 73
+                    > USED AT LINE 12
+L0:                 4303 DEFINED AT LINE 102
+                    > USED AT LINE 11
+                    > USED AT LINE 97
+L1:                 431E DEFINED AT LINE 114
+                    > USED AT LINE 116
+GETCH:              4326 DEFINED AT LINE 122
+                    > USED AT LINE 13
+                    > USED AT LINE 114
+L2:                 4329 DEFINED AT LINE 123
+                    > USED AT LINE 122
+L3:                 432F DEFINED AT LINE 127
+                    > USED AT LINE 127
+L4:                 4339 DEFINED AT LINE 133
+                    > USED AT LINE 133
+L5:                 433B DEFINED AT LINE 134
+                    > USED AT LINE 147
+L6:                 433D DEFINED AT LINE 135
+                    > USED AT LINE 135
+L7:                 4349 DEFINED AT LINE 145
+                    > USED AT LINE 131
+PUTCH:              434F DEFINED AT LINE 156
+                    > USED AT LINE 15
+                    > USED AT LINE 115
+L8:                 4352 DEFINED AT LINE 158
+                    > USED AT LINE 183
+L9:                 435A DEFINED AT LINE 161
+                    > USED AT LINE 158
+                    > USED AT LINE 172
+L10:                435C DEFINED AT LINE 162
+                    > USED AT LINE 162
+L11:                4368 DEFINED AT LINE 170
+                    > USED AT LINE 170
+L12:                436D DEFINED AT LINE 173
+                    > USED AT LINE 168
+L13:                4375 DEFINED AT LINE 176
+                    > USED AT LINE 173
+                    > USED AT LINE 187
+L14:                4377 DEFINED AT LINE 177
+                    > USED AT LINE 177
+L15:                4383 DEFINED AT LINE 185
+                    > USED AT LINE 185

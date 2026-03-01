@@ -1,0 +1,7 @@
+	; This now works as I use ROM CLS first
+	org 32000d
+
+	call $0daf ; ROM cls
+	ld a,'J'
+	rst 16d
+	ret

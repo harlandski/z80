@@ -1,0 +1,3 @@
+#!/bin/sh
+
+sjasmplus --lst sjasmplus-test.z80

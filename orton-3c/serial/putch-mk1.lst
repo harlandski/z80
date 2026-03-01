@@ -1,0 +1,52 @@
+# file opened: putch.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000 48 65 6C 6C  HELLO   db "Hello, World!"
+ 3    0004 6F 2C 20 57
+ 3    0008 6F 72 6C 64
+ 3    000C 21
+ 4    000D
+ 5    000D 3E 0D        START:  LD A,13
+ 6    000F 47                   LD B,A
+ 7    0010 21 00 00             LD HL,HELLO
+ 8    0013 7E           LOOP    LD A,(HL)
+ 9    0014 D9                   EXX
+10    0015 CD 1D 00             CALL PUTCH
+11    0018 D9                   EXX
+12    0019 23                   INC HL
+13    001A 10 F7                DJNZ LOOP
+14    001C 76                   HALT
+15    001D
+16    001D 4F           PUTCH:  LD   C,A
+17    001E 16 0A                LD   D,10
+18    0020 21 28 80     L8:     LD   HL,L9+$8000
+19    0023 3E 80                LD   A,80H
+20    0025 C3 FE 3F             JP   $3FFE
+21    0028 06 1A        L9:     LD   B,26
+22    002A 10 FE        L10:    DJNZ   L10
+23    002C 00                   NOP
+24    002D 00                   NOP
+25    002E 37                   SCF
+26    002F CB 19                RR   C
+27    0031 38 07                JR   C,L12
+28    0033 06 02                LD   B,2
+29    0035 10 FE        L11:    DJNZ   L11
+30    0037 00                   NOP
+31    0038 18 EE                JR L9
+32    003A 21 42 00     L12:    LD   HL,L13
+33    003D 3E 00                LD   A,0
+34    003F C3 FE 3F             JP   $3FFE
+35    0042 06 1A        L13:    LD   B,26
+36    0044 10 FE        L14:    DJNZ   L14
+37    0046 37                   SCF
+38    0047 CB 19                RR   C
+39    0049 C8                   RET   Z
+40    004A 00                   NOP
+41    004B 30 D3                JR   NC,L8
+42    004D 06 02                LD   B,2
+43    004F 10 FE        L15:    DJNZ   L15
+44    0051 00                   NOP
+45    0052 18 EE                JR   L13
+46    0054              .END
+47    0054
+# file closed: putch.asm

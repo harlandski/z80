@@ -1,0 +1,21 @@
+# file opened: 003-number-of-negative-elements.asm
+ 1    0000                              org 0
+ 2    0000
+ 3    0000 21 15 00     START:          ld hl, ITEMS
+ 4    0003 46                           ld b, (hl)
+ 5    0004 0E 00                        ld c, 0
+ 6    0006 23           COUNT:          inc hl
+ 7    0007 7E                           ld a,(hl)
+ 8    0008 A7                           and a
+ 9    0009 F2 0D 00                     jp p,NOCOUNT
+10    000C 0C                           inc c
+11    000D 10 F7        NOCOUNT:        djnz COUNT
+12    000F 79           END:            ld a,c
+13    0010 32 14 00                     ld (OUTPUT),A
+14    0013 76                           halt
+15    0014 00           OUTPUT:         db 0
+16    0015 06           ITEMS:          db 6
+17    0016 68 F2 87 30  NUMBERS:        db $68, $f2, $87, $30, $59, $2a
+17    001A 59 2A
+18    001C
+# file closed: 003-number-of-negative-elements.asm

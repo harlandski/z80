@@ -1,0 +1,17 @@
+# file opened: 001-sum-of-data.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000 21 0F 00     START:  ld hl,REPEAT
+ 4    0003 46                   ld b,(hl) ; initializes number of repetitions
+ 5    0004 97                   sub a ; a = 0
+ 6    0005 23           LOOP:   inc hl
+ 7    0006 86                   add a,(hl)
+ 8    0007 05                   dec b
+ 9    0008 20 FB                jr nz,LOOP
+10    000A 32 0E 00             ld (RESULT),a
+11    000D 76                   HALT
+12    000E 00           RESULT: db 0
+13    000F 03           REPEAT: db 3
+14    0010 28 55 26     INPUT:  db $28, $55, $26
+15    0013
+# file closed: 001-sum-of-data.asm

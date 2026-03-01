@@ -1,0 +1,50 @@
+# file opened: 16-bit-addition.asm
+ 1    0000                DEVICE ZXSPECTRUM48
+ 2    0000
+ 3    0000                ; Adding two sixteen bit numbers with 8 bit add and adc
+ 4    0000                ; Note there is a more efficient way of doing this:
+ 5    0000                ; ld h,b
+ 6    0000                ; ld l,c
+ 7    0000                ; add hl, de
+ 8    0000                ; but I learned a lot by doing it this way, and was amazed that it worked first time
+ 9    0000
+10    0000                org 32000
+11    7D00
+12    7D00 C3 05 7D       jp start
+13    7D03
+14    7D03              FIRSTNUMBER   = 20000
+15    7D03              SECONDNUMBER  = 40000
+16    7D03              CHAN_OPEN   = $1601 ; This and following required to print number without PEEK
+17    7D03              STACK_BC    = $2D2B ; It doesn't work properly as it only prints a 16 bit number
+18    7D03              PRINT_FP    = $2DE3
+19    7D03
+20    7D03              answer:
+21    7D03 00 00          db $0,$0
+22    7D05                ; To see the result afterwards PRINT PEEK 256 * 32004 + PEEK 32003
+23    7D05                ; This gives the correct result of 60000
+24    7D05
+25    7D05              start:
+26    7D05 01 20 4E       ld bc, FIRSTNUMBER
+27    7D08 11 40 9C       ld de, SECONDNUMBER
+28    7D0B 79             ld a, c   ; add lower
+29    7D0C 83             add a, e  ; bytes
+30    7D0D 6F             ld l, a   ; store answer in l
+31    7D0E 78             ld a, b   ; add higher
+32    7D0F 8A             adc a, d  ; bytes, with carry
+33    7D10 67             ld h, a   ; store answer in h
+34    7D11 22 03 7D       ld (answer), hl
+35    7D14
+36    7D14              print:
+37    7D14 3E 02          ld a,2
+38    7D16 CD 01 16       call CHAN_OPEN ; open screen channel
+39    7D19 2A 03 7D       ld hl, (answer)
+40    7D1C 44             ld b, h
+41    7D1D 4D             ld c, l
+42    7D1E CD 2B 2D       call STACK_BC ; push BC into FP as a small integer
+43    7D21 CD E3 2D       call PRINT_FP ; prints decimal to curent channel
+44    7D24
+45    7D24 C9             ret
+46    7D25
+47    7D25                SAVESNA "16badd.sna", start
+48    7D25
+# file closed: 16-bit-addition.asm

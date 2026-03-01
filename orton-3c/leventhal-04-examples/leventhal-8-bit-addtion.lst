@@ -1,0 +1,15 @@
+# file opened: leventhal-8-bit-addtion.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000              INPUTA  = $0C
+ 4    0000              INPUTB  = $0D
+ 5    0000              OUTPUT  = $0E
+ 6    0000
+ 7    0000 3A 0C 00             LD A,(INPUTA)
+ 8    0003 47                   LD B,A
+ 9    0004 3A 0D 00             LD A,(INPUTB)
+10    0007 80                   ADD A,B
+11    0008 32 0E 00             LD (OUTPUT),A
+12    000B 76                   HALT
+13    000C
+# file closed: leventhal-8-bit-addtion.asm

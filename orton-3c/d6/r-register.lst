@@ -1,0 +1,10 @@
+# file opened: r-register.asm
+1     0000                      org 0
+2     0000
+3     0000 ED 5F        START:  ld a,r
+4     0002 32 06 00             ld (OUTPUT),a
+5     0005 76                   HALT
+6     0006
+7     0006              OUTPUT:
+8     0006
+# file closed: r-register.asm

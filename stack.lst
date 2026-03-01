@@ -1,0 +1,83 @@
+# file opened: stack.asm
+ 1    0000                DEVICE ZXSPECTRUM48
+ 2    0000
+ 3    0000                org $8000
+ 4    8000
+ 5    8000 C3 05 80       jp start
+ 6    8003
+ 7    8003              SCREEN_BITMAP   = $4000
+ 8    8003              BITMAP_SIZE     = $1800
+ 9    8003              SCREEN_COLOR    = $5800
+10    8003              COLOR_SIZE      = $0300
+11    8003
+12    8003              sp_backup:
+13    8003 00 00          dw 0 ; remember dw is a 2-byte word, enough to backup the stack pointer
+14    8005
+15    8005              start:
+16    8005 D9             exx ; do this to bring HL' into HL
+17    8006 E5             push hl;  save the current state of HL', for smooth return to BASIC
+18    8007
+19    8007                ;make stripes
+20    8007 21 00 40       ld hl, SCREEN_BITMAP ; Start at beginning of screen memory
+21    800A 11 66 99       ld de, $9966 ; 16 pixel pattern
+22    800D                ;; Original value $FF00
+23    800D                ; Little endian - paper 00 then ink FF
+24    800D 01 00 0C       ld bc, BITMAP_SIZE/2 ; Note the division is done by the assembler; whole screen
+25    8010 CD 22 80       call fill_ram ; fill in pixel data
+26    8013
+27    8013                ;; If you don't include the following block, you only get white and black stripes
+28    8013
+29    8013 21 00 58       ld hl, SCREEN_COLOR
+30    8016 11 FA F9       ld de, $F9FA
+31    8019                ; First I experimented, now am figuring out the colours
+32    8019                ; bit 7 - flashing
+33    8019                ; bit 6 - bright
+34    8019                ; bits 5 to 3: paper
+35    8019                ; bits 2 to 0: ink
+36    8019                ; 001 blue; 010 red; 011 magenta; 100 green; 101 cyan; 110 yellow; 111 white
+37    8019                ; $4A4A - blue paper, red ink (01-001-010)
+38    8019                ; $A4A4 - all green (10-100-100) note paper and ink same colour
+39    8019                ; $4C5A - magenta paper, green ink ($4C: 01-001 blue -100 - green) (5A: 01-011 magenta - 010 - red)
+40    8019                ; so the first pair determines, the ink, the second the paper, but that's only because the original values are $FF00
+41    8019                ; if you mess around with line 21, you can have 4 colours on screen
+42    8019                ; the second pair comes first on the screen
+43    8019                ; $AAAA - flashing cyan and red (with $FF00)
+44    8019                ; $BBBB - flashing white and magenta
+45    8019                ; $CACA - flashing red & blue (11-001-010)
+46    8019                ; $CCCC - flashing green & blue
+47    8019                ; $DDDD - flashing cyan & magenta
+48    8019                ; $EEEE - flashing yellow & cyan
+49    8019                ; $FFFF - bright white?
+50    8019                ; $0E2F - blue and yellow, white and cyan, but reversed due to little endian
+51    8019                ; $F9FA - blue and white and red and white flashing, like police lights (1111001 11111010)
+52    8019                ; $FDFA - same but cyan - I think police lights are more cyan than blue (1111101)
+53    8019                ; No actually blue and red is better
+54    8019 01 80 01       ld bc, COLOR_SIZE/2
+55    801C CD 22 80       call fill_ram
+56    801F
+57    801F E1             pop hl ; get HL' back
+58    8020 D9             exx; put it back in HL
+59    8021 C9             ret
+60    8022
+61    8022              fill_ram:
+62    8022                ; HL = RAM address
+63    8022                ; BC = number of words
+64    8022                ; DE = words to write
+65    8022 ED 73 03 80    ld (sp_backup), sp ; back up the stack pointer
+66    8026 09             add hl, bc
+67    8027 09             add hl, bc ; HL = address after target segment
+68    8028 F9             ld sp, hl ; make the RAM the stack
+69    8029 3E FF          ld a, $FF
+70    802B              .loop
+71    802B D5             push de ; write pattern
+72    802C 0D             dec c ; decrement index loop - lower digit
+73    802D C2 2B 80       jp nz,.loop
+74    8030 05             dec b ; decrement index loop - upper byte
+75    8031 B8             cp b ; check for underflow
+76    8032 C2 2B 80       jp nz,.loop
+77    8035 ED 7B 03 80    ld sp,(sp_backup) ; restore stack pointer
+78    8039 C9             ret
+79    803A
+80    803A                SAVESNA "stack.sna", start
+81    803A
+# file closed: stack.asm

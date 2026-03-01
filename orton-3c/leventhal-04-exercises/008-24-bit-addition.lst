@@ -1,0 +1,25 @@
+# file opened: 008-24-bit-addition.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000 3A 22 00     START:  LD A,   (FIRST)
+ 4    0003 47                   LD B,   A
+ 5    0004 3A 25 00             LD A,   (SECOND)
+ 6    0007 80                   ADD B
+ 7    0008 32 28 00             LD (RESULT),    A
+ 8    000B 3A 23 00             LD A,   (FIRST+1)
+ 9    000E 47                   LD B,   A
+10    000F 3A 26 00             LD A,   (SECOND+1)
+11    0012 88                   ADC B
+12    0013 32 29 00             LD (RESULT+1), A
+13    0016 3A 24 00             LD A,   (FIRST+2)
+14    0019 47                   LD B,   A
+15    001A 3A 27 00             LD A,   (SECOND+2)
+16    001D 88                   ADC B
+17    001E 32 2A 00             LD (RESULT+2), A
+18    0021 76                   HALT
+19    0022
+20    0022 2A 67 35     FIRST:  db $2a, $67, $35
+21    0025 F8 A4 51     SECOND: db $f8, $a4, $51
+22    0028              RESULT:
+23    0028
+# file closed: 008-24-bit-addition.asm

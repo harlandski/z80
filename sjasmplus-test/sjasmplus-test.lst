@@ -1,0 +1,11 @@
+# file opened: sjasmplus-test.z80
+1     0000              	DEVICE ZXSPECTRUM48
+2     0000
+3     0000              start:
+4     0000              	org $8000
+5     8000
+6     8000 C9           	ret
+7     8001
+8     8001              	SAVESNA "sjasmplus-test.sna", start
+9     8001
+# file closed: sjasmplus-test.z80

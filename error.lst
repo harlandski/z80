@@ -1,0 +1,27 @@
+# file opened: error.asm
+ 1    0000              ; Trying to call various error codes
+ 2    0000
+ 3    0000                DEVICE ZXSPECTRUM48
+ 4    0000
+ 5    0000                org $8000
+ 6    8000
+ 7    8000              start:
+ 8    8000
+ 9    8000 F3             di
+10    8001 31 00 5B       ld sp, $5B00      ; normal BASIC stack area
+11    8004 FD 21 3A 5C    ld iy, $5C3A      ; system variables base
+12    8008 FB             ei
+13    8009
+14    8009 CF             rst $08
+15    800A                ; For reasons not explained in the course, the db+1 is called
+16    800A                ; db $00 ; 1 NEXT without FOR
+17    800A                ; db $01; 2 Variable not found
+18    800A                ; db $02 ; 3 Subscript wrong
+19    800A                ; db $03 ; 4 Out of memory
+20    800A                ;db $04 ; 5 Out of screen
+21    800A 17             db 23 ; O Invalid stream - very seen this one
+22    800B                ; db 26 ; R Tape loading error - note you need to use decimal, if you put $26 you get "↑ ? M"
+23    800B
+24    800B                SAVESNA 'error.sna', start
+25    800B
+# file closed: error.asm

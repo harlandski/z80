@@ -1,0 +1,52 @@
+# file opened: putch-rom.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000 3E 0B        START:  LD A,LENGTH
+ 4    0002 47                   LD B,A
+ 5    0003 21 47 00             LD HL,HELLO
+ 6    0006 7E           LOOP    LD A,(HL)
+ 7    0007 D9                   EXX
+ 8    0008 CD 10 00             CALL PUTCH
+ 9    000B D9                   EXX
+10    000C 23                   INC HL
+11    000D 10 F7                DJNZ LOOP
+12    000F 76                   HALT
+13    0010
+14    0010 4F           PUTCH:  LD   C,A
+15    0011 16 0A                LD   D,10
+16    0013 21 1B 80     L8:     LD   HL,L9+$8000
+17    0016 3E 80                LD   A,80H
+18    0018 C3 FE 3F             JP   $3FFE
+19    001B 06 1A        L9:     LD   B,26
+20    001D 10 FE        L10:    DJNZ   L10
+21    001F 00                   NOP
+22    0020 00                   NOP
+23    0021 37                   SCF
+24    0022 CB 19                RR   C
+25    0024 38 07                JR   C,L12
+26    0026 06 02                LD   B,2
+27    0028 10 FE        L11:    DJNZ   L11
+28    002A 00                   NOP
+29    002B 18 EE                JR L9
+30    002D 21 35 00     L12:    LD   HL,L13
+31    0030 3E 00                LD   A,0
+32    0032 C3 FE 3F             JP   $3FFE
+33    0035 06 1A        L13:    LD   B,26
+34    0037 10 FE        L14:    DJNZ   L14
+35    0039 37                   SCF
+36    003A CB 19                RR   C
+37    003C C8                   RET   Z
+38    003D 00                   NOP
+39    003E 30 D3                JR   NC,L8
+40    0040 06 02                LD   B,2
+41    0042 10 FE        L15:    DJNZ   L15
+42    0044 00                   NOP
+43    0045 18 EE                JR   L13
+44    0047              .END
+45    0047
+46    0047 48 65 6C 6C  HELLO   db "Hello World"
+46    004B 6F 20 57 6F
+46    004F 72 6C 64
+47    0052              LENGTH  = 11
+48    0052
+# file closed: putch-rom.asm

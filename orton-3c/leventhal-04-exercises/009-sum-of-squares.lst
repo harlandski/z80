@@ -1,0 +1,29 @@
+p # file opened: 009-sum-of-squares.asm
+ 1    0000              ; Calculate the squares of memory locations X and X+1 and add them together
+ 2    0000              ; Place the results in X+2. Assume that X and X+1 >=0 and <=7
+ 3    0000
+ 4    0000                      org 0
+ 5    0000
+ 6    0000 3A 1F 00     START:  LD A,(INPUTA)
+ 7    0003 26 00                LD H,0
+ 8    0005 6F                   LD L,A
+ 9    0006 11 17 00             LD DE, SQTAB
+10    0009 19                   ADD HL,DE
+11    000A 7E                   LD A,(HL)
+12    000B 47                   LD B,A
+13    000C 3A 20 00             LD A,(INPUTB)
+14    000F 6F                   LD L,A
+15    0010 19                   ADD HL,DE
+16    0011 7E                   LD A,(HL)
+17    0012 80                   ADD B
+18    0013 32 21 00             LD (OUTPUT),A
+19    0016 76                   HALT
+20    0017
+21    0017 00 01 04 09  SQTAB:  db 0,1,4,9,16,25,36,49
+21    001B 10 19 24 31
+22    001F
+23    001F 03           INPUTA: db 3
+24    0020 06           INPUTB: db 6
+25    0021              OUTPUT:
+26    0021
+# file closed: 009-sum-of-squares.asm

@@ -1,0 +1,27 @@
+000:
+
+3A LD, A ($3031)
+31
+30
+34 INC (HL)
+30 JR NZ, 30
+30
+30 JR NZ,30
+30
+30 JR NZ, 43
+43
+33 INC SP
+30 JR NZ, 33
+33
+34 INC (HL)
+33 INC SP
+43 LD BE, E
+33 INC SP
+
+100:
+
+FF forever
+
+110:
+
+FF forever

@@ -1,0 +1,33 @@
+# file opened: colourful.asm
+ 1    0000              	DEVICE ZXSPECTRUM48
+ 2    0000
+ 3    0000              	org 32000
+ 4    7D00
+ 5    7D00              COLOR_ATTR 	= $5800
+ 6    7D00              CLS		= $0DAF
+ 7    7D00
+ 8    7D00              start:
+ 9    7D00 CD AF 0D     	call CLS
+10    7D03 06 FF        	ld b,$ff
+11    7D05
+12    7D05              xloop:
+13    7D05 3E 58        	ld a,'X'
+14    7D07 D7           	rst $10
+15    7D08 10 FB        	djnz xloop
+16    7D0A
+17    7D0A              setup:
+18    7D0A AF           	xor a ; hopefully sets a to 0
+19    7D0B 06 FF        	ld b,$ff;
+20    7D0D 21 00 58     	ld hl, COLOR_ATTR
+21    7D10
+22    7D10              colourloop:
+23    7D10 77           	ld (hl),a
+24    7D11 23           	inc hl
+25    7D12 3C           	inc a
+26    7D13 10 FB        	djnz colourloop
+27    7D15
+28    7D15 C9           	ret
+29    7D16
+30    7D16              	SAVEBIN "colourful.bin", start
+31    7D16
+# file closed: colourful.asm

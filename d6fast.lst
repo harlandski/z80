@@ -1,0 +1,166 @@
+# file opened: d6fast.asm
+  1   0000                DEVICE ZXSPECTRUM48
+  2   0000
+  3   0000                org $8000
+  4   8000
+  5   8000 C3 05 80       jp start
+  6   8003
+  7   8003              LASTK   = $5BF8
+  8   8003              FRAMES  = $5C78 ; Frames variable incremented every 1/50s
+  9   8003              CHAN_OPEN   = $1601
+ 10   8003              STACK_BC    = $2D2B
+ 11   8003              PRINT_FP    = $2DE3
+ 12   8003              ENTER       = $0D
+ 13   8003              ROM_CLS     = $0DAF
+ 14   8003
+ 15   8003              seed:
+ 16   8003 01             db 1  ; start nonzero, will be re-seeded
+ 17   8004
+ 18   8004              linecount:
+ 19   8004 00             db  0
+ 20   8005
+ 21   8005              start:
+ 22   8005 CD 30 80       call SeedFromKey
+ 23   8008 3E 02          ld a,2
+ 24   800A CD 01 16       call CHAN_OPEN ; open screen channel
+ 25   800D CD 9A 80       call RollD6_Fast
+ 26   8010 4F             ld c,a
+ 27   8011 06 00          ld b,0
+ 28   8013 CD 2B 2D       call STACK_BC ; push BC into FP as a small integer
+ 29   8016 CD E3 2D       call PRINT_FP ; prints decimal to curent channel
+ 30   8019              ; print newline
+ 31   8019 3E 0D          ld a,ENTER
+ 32   801B D7             rst $10
+ 33   801C              ; increment line counter
+ 34   801C 21 04 80       ld hl,linecount
+ 35   801F 34             inc (hl)
+ 36   8020 7E             ld a,(hl)
+ 37   8021 FE 16          cp 22
+ 38   8023 38 05          jr c,.no_scroll
+ 39   8025
+ 40   8025                ; we've reached the bottom - clear and reset
+ 41   8025 AF             xor a
+ 42   8026 77             ld (hl), a
+ 43   8027 CD AF 0D       call ROM_CLS
+ 44   802A
+ 45   802A              .no_scroll:
+ 46   802A                ; Debounce
+ 47   802A CD 65 80       call WaitRelease
+ 48   802D 18 D6          jr start
+ 49   802F C9             ret
+ 50   8030
+ 51   8030                ; --- Wait for ANY key, building a seed from timing ---
+ 52   8030                ; Uses the Spectrum keyboard matrix on port $FE.
+ 53   8030                ; Clobbers: AF,BC,DE,HL
+ 54   8030              SeedFromKey:
+ 55   8030 0E FE          ld c,$FE          ; keyboard/mic/ear/border port
+ 56   8032
+ 57   8032              ;D will evolve as our rolling mixer while we wait
+ 58   8032 3A 03 80       ld a,(seed)
+ 59   8035 57             ld d,a
+ 60   8036
+ 61   8036              .wait:
+ 62   8036                        ; Scan 8 keyboard rows: B = %11111110, then RLC through all rows
+ 63   8036 06 FE          ld b,%11111110    ; row 0 (caps shift..V)
+ 64   8038 1E 08          ld e,8
+ 65   803A              .row_loop:
+ 66   803A ED 78          in a,(c)          ; read selected row
+ 67   803C E6 1F          and %00011111      ; 5 columns (bit=0 means key pressed)
+ 68   803E FE 1F          cp %00011111
+ 69   8040 20 16          jr nz,.key_found  ; any zero bit => some key is down
+ 70   8042
+ 71   8042 CB 00          rlc b              ; select next row: FE, FD, FB, F7, EF, DF, BF, 7F
+ 72   8044 1D             dec e
+ 73   8045 20 F3          jr nz,.row_loop
+ 74   8047
+ 75   8047                ; No key yet: keep stirring a candidate seed with R and FRAMES
+ 76   8047 ED 5F          ld a,r
+ 77   8049 AA             xor d
+ 78   804A 57             ld d,a
+ 79   804B
+ 80   804B 21 78 5C       ld hl,FRAMES      ; mix FRAMES low byte (ticks at 50 Hz)
+ 81   804E 7E             ld a,(hl)
+ 82   804F AA             xor d
+ 83   8050 F6 01          or 1              ; avoid zero seed
+ 84   8052 32 03 80       ld (seed),a
+ 85   8055
+ 86   8055 C3 36 80       jp .wait
+ 87   8058
+ 88   8058              .key_found:
+ 89   8058                ; Finalise seed once we detect a key, mixing timing again
+ 90   8058 ED 5F          ld      a,r
+ 91   805A 21 78 5C       ld      hl,FRAMES
+ 92   805D AE             xor     (hl)
+ 93   805E AA             xor     d
+ 94   805F F6 01          or      1
+ 95   8061 32 03 80       ld      (seed),a
+ 96   8064 C9             ret
+ 97   8065
+ 98   8065              ; Returns: A: 0..255, updates seed
+ 99   8065
+100   8065              ; Wait until no key is pressed (debounce)
+101   8065              WaitRelease:
+102   8065 0E FE            ld c,$FE
+103   8067              .releaseRowLoop:
+104   8067 06 FE            ld b,%11111110     ; start row
+105   8069 2E 08            ld l,8
+106   806B              .releaseCheck:
+107   806B ED 78            in a,(c)
+108   806D E6 1F            and %00011111
+109   806F FE 1F            cp %00011111
+110   8071 20 06            jr nz,.releaseRowFound   ; a key is still down
+111   8073 CB 00            rlc b
+112   8075 2D               dec l
+113   8076 20 F3            jr nz,.releaseCheck
+114   8078 C9               ret ; no keys down, return
+115   8079
+116   8079              .releaseRowFound:
+117   8079 18 EC            jr .releaseRowLoop
+118   807B
+119   807B
+120   807B              GetRand8:
+121   807B 3A 03 80       ld a,(seed)
+122   807E 47             ld b,a
+123   807F ED 5F          ld a,r
+124   8081 A8             xor b ; add a little jitter
+125   8082                ; x ^= x << 3
+126   8082 47             ld b,a
+127   8083 07             rlca
+128   8084 07             rlca
+129   8085 07             rlca
+130   8086 A8             xor b
+131   8087
+132   8087                ;x ^= x >> 5
+133   8087 47             ld b,a
+134   8088 CB 38          srl b
+135   808A CB 38          srl b
+136   808C CB 38          srl b
+137   808E CB 38          srl b
+138   8090 CB 38          srl b
+139   8092 A8             xor b
+140   8093
+141   8093                ; x ^= x << 1
+142   8093 47             ld b,a
+143   8094 07             rlca
+144   8095 A8             xor b
+145   8096
+146   8096 32 03 80       ld (seed),a
+147   8099 C9             ret
+148   809A
+149   809A              ; Fast d6 with tiny bias
+150   809A              RollD6_Fast:
+151   809A CD 7B 80       call GetRand8 ; A = 0..255
+152   809D 6F             ld l,a
+153   809E 26 00          ld h,0
+154   80A0 29             add hl,hl ; *2
+155   80A1 54             ld d,h
+156   80A2 5D             ld e,l    ;DE = A * 2
+157   80A3 29             add hl,hl ; *4
+158   80A4 19             add hl,de ; *6
+159   80A5 7C             ld a,h    ; high byte = floor ((A*6)/256)
+160   80A6 3C             inc a     ; 0..5 -> 1..6
+161   80A7 C9             ret
+162   80A8
+163   80A8                SAVESNA "d6Fast.sna", start
+164   80A8
+# file closed: d6fast.asm

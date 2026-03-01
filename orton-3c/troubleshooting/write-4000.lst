@@ -1,0 +1,11 @@
+# file opened: write-4000.asm
+1     0000                      org 0
+2     0000
+3     0000 3E AA                ld a,$aa
+4     0002 32 00 40             ld ($4000),a
+5     0005 AF                   xor a
+6     0006 3A 00 40             ld a,($4000)
+7     0009 32 10 00             ld ($10),a
+8     000C 76                   halt
+9     000D
+# file closed: write-4000.asm

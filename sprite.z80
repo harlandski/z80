@@ -1,0 +1,15 @@
+;Draw an arbitrary sprite at an arbitrary screen position
+
+	org $7D00
+
+start:	ld hl, (ScreenPos)
+	ld de, Sprite
+	ld b, $08
+loop:	ld a, (de)
+	ld (hl), a
+	inc de
+	inc h
+	djnz loop
+	ret
+ScreenPos:	db $00,$40
+Sprite:		db $81,$42,$24,$18,$18,$24,$42,$81

@@ -1,0 +1,28 @@
+	org $8000
+
+	jp start
+
+string:
+	db "hello"
+
+STRING_LENGTH:	equ 5
+
+ROM_CLS:	equ $0DAF	; ROM address for "Clear Screen" routine
+COLOR_ATTR:	equ $5800	; start of colour attribute memory
+ENTER:		equ $0D		; character code for ENTER key
+BLACK_WHITE:	equ $47		; black paper; white ink
+
+start:
+	im 1			; set interrupt mode to 1 (interrupt mode)
+	call ROM_CLS		; call clear screen routine (extended immediate)
+	ld hl,string		; HL = address of string (register, extended immediate)
+	ld b,STRING_LENGTH	; B = length of string (register, immediate)
+
+loop:	
+	ld a,(hl)		; A = byte at address in HL (register, register indirect)
+	rst $10			; print character code in A (modified page zero)
+	inc hl			; increment hl to address of next character (register)
+	
+	ret
+
+

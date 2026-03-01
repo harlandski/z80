@@ -1,0 +1,9 @@
+# file opened: check-led.asm
+1     0000                      org 0
+2     0000
+3     0000 00           START:  nop
+4     0001 3E 01                ld a,$01
+5     0003 D3 00                out ($00),a
+6     0005 C3 00 00             jp START
+7     0008
+# file closed: check-led.asm

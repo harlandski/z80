@@ -1,0 +1,166 @@
+# file opened: Orton3C.asm
+  1   0000
+  2   0000              ; roll any die
+  3   0000              ; random routine taken from z80.info fast rnd
+  4   0000              ; requires input-output module
+  5   0000              ; Note: switches should be set before the program runs
+  6   0000              ; Note: once a program is running, just flicking ⟳ will re-run it
+  7   0000                      device NOSLOT64K
+  8   0000
+  9   0000 00 00 00...  	      ds $3fff - $ ; pad the first $3fff bytes with 0
+ 10   3FFF                      org $4000
+ 11   4000
+ 12   4000              SEED 	  = $04 ; The non-zero seed needs to be in RAM, and can be entered after 00 C3 00 40
+ 13   4000
+ 14   4000 3A 04 00     RANDOM: ld a, (SEED)
+ 15   4003 47                   ld b,a
+ 16   4004
+ 17   4004 0F                   rrca
+ 18   4005 0F                   rrca
+ 19   4006 0F                   rrca
+ 20   4007 EE 1F                xor $1f
+ 21   4009
+ 22   4009 80                   add a,b
+ 23   400A DE FF                sbc a,255; carry
+ 24   400C
+ 25   400C 32 04 00             ld (SEED), a; save number as next seed, and also for use in CONV
+ 26   400F
+ 27   400F              ; read the input, and deal with edge cases of $00 and $FF
+ 28   400F DB 00        INPUT:  in A,($00)
+ 29   4011 FE 00                cp $00
+ 30   4013 28 43                jr z, OUTPUT
+ 31   4015 FE FF                cp $FF
+ 32   4017 28 04                jr z, IS255
+ 33   4019 47                   ld b,a ; b is the maximum we want
+ 34   401A 04                   inc b; but we need to test one more than max
+ 35   401B 18 01                jr TESTS
+ 36   401D 47           IS255:  ld b,a; unless a is 255, then we'll leave it as that
+ 37   401E
+ 38   401E              ; test bits and set mask. Only the highest mask remains
+ 39   401E 0E 00        TESTS:  ld c,0; reset mask
+ 40   4020 CB 47        TEST0:  bit 0,a ; is bit 0 set?
+ 41   4022 28 02                jr z, TEST1
+ 42   4024 0E 01                ld c,%00000001; mask
+ 43   4026 CB 4F        TEST1:  bit 1,a; is bit 1 set?
+ 44   4028 28 02                jr z, TEST2
+ 45   402A 0E 03                ld c,%00000011
+ 46   402C CB 57        TEST2:  bit 2,a; is bit 2 set?
+ 47   402E 28 02                jr z, TEST3
+ 48   4030 0E 07                ld c,%00000111
+ 49   4032 CB 5F        TEST3:  bit 3,a ; etc
+ 50   4034 28 02                jr z, TEST4
+ 51   4036 0E 0F                ld c,%00001111
+ 52   4038 CB 67        TEST4:  bit 4,a
+ 53   403A 28 02                jr z, TEST5
+ 54   403C 0E 1F                ld c,%00011111
+ 55   403E CB 6F        TEST5:  bit 5,a
+ 56   4040 28 02                jr z, TEST6
+ 57   4042 0E 3F                ld c,%00111111
+ 58   4044 CB 77        TEST6:  bit 6,a
+ 59   4046 28 02                jr z, TEST7
+ 60   4048 0E 7F                ld c,%01111111
+ 61   404A CB 7F        TEST7:  bit 7,a
+ 62   404C 28 02                jr z, CONV
+ 63   404E 0E FF                ld c,%11111111
+ 64   4050
+ 65   4050              ; Convert to range 1-max, and truncate numbers higher than desired
+ 66   4050 3A 04 00     CONV:   ld a, (SEED) ; bring our random number back
+ 67   4053 A1                   and c   ; keep lowest bits as per mask
+ 68   4054 3C                   inc a   ; make range start at 1
+ 69   4055 B8                   cp b    ; if result is > max
+ 70   4056 30 A8                jr nc,RANDOM     ; reject and start again
+ 71   4058
+ 72   4058 D3 00        OUTPUT: out ($00),a ; infinite loop
+ 73   405A 18 FC                jr OUTPUT
+ 74   405C
+ 75   405C 00                   nop
+ 76   405D 00                   nop
+ 77   405E 00                   nop
+ 78   405F 00                   nop
+ 79   4060
+ 80   4060              ;; slower speed kill the bit
+ 81   4060
+ 82   4060 21 00 00     KBIT15: ld hl, 0    ; initialize counter
+ 83   4063 16 80                ld d, $80   ; set up initial display bit
+ 84   4065 01 0E 00             ld bc, $0e  ; higher value = faster
+ 85   4068 7A           KSTA15: ld a, d     ; display pattern on Orton 3C lights
+ 86   4069 D3 00                out ($00),a
+ 87   406B D3 00                out ($00),a
+ 88   406D D3 00                out ($00),a
+ 89   406F D3 00                out ($00),a
+ 90   4071 09                   add hl,bc   ; increment display counter
+ 91   4072 30 F4                jr nc, KSTA15
+ 92   4074 DB 00                in a, ($00) ; input data from input switches
+ 93   4076 AA                   xor d       ; exclusive or with A
+ 94   4077 0F                   rrca        ; rotate display right one bit
+ 95   4078 57                   ld d,a      ; move data to display reg
+ 96   4079 18 ED                jr KSTA15    ; repeat sequence
+ 97   407B
+ 98   407B 00                   nop
+ 99   407C 00                   nop
+100   407D 00                   nop
+101   407E 00                   nop
+102   407F 00                   nop
+103   4080
+104   4080              ;; medium speed kill the bit
+105   4080
+106   4080 21 00 00     KBIT20: ld hl, 0    ; initialize counter
+107   4083 16 80                ld d, $80   ; set up initial display bit
+108   4085 01 14 00             ld bc, $14  ; higher value = faster
+109   4088 7A           KSTA20: ld a, d     ; display pattern on Orton 3C lights
+110   4089 D3 00                out ($00),a
+111   408B D3 00                out ($00),a
+112   408D D3 00                out ($00),a
+113   408F D3 00                out ($00),a
+114   4091 09                   add hl,bc   ; increment display counter
+115   4092 30 F4                jr nc, KSTA20
+116   4094 DB 00                in a, ($00) ; input data from input switches
+117   4096 AA                   xor d       ; exclusive or with A
+118   4097 0F                   rrca        ; rotate display right one bit
+119   4098 57                   ld d,a      ; move data to display reg
+120   4099 18 ED                jr KSTA20    ; repeat sequence
+121   409B
+122   409B 00                   nop
+123   409C 00                   nop
+124   409D 00                   nop
+125   409E 00                   nop
+126   409F 00                   nop
+127   40A0
+128   40A0              ;; boss speed kill the bit
+129   40A0
+130   40A0 21 00 00     KBIT25: ld hl, 0    ; initialize counter
+131   40A3 16 80                ld d, $80   ; set up initial display bit
+132   40A5 01 19 00             ld bc, $19  ; higher value = faster
+133   40A8 7A           KSTA25: ld a, d     ; display pattern on Orton 3C lights
+134   40A9 D3 00                out ($00),a
+135   40AB D3 00                out ($00),a
+136   40AD D3 00                out ($00),a
+137   40AF D3 00                out ($00),a
+138   40B1 09                   add hl,bc   ; increment display counter
+139   40B2 30 F4                jr nc, KSTA25
+140   40B4 DB 00                in a, ($00) ; input data from input switches
+141   40B6 AA                   xor d       ; exclusive or with A
+142   40B7 0F                   rrca        ; rotate display right one bit
+143   40B8 57                   ld d,a      ; move data to display reg
+144   40B9 18 ED                jr KSTA25    ; repeat sequence
+145   40BB
+146   40BB 00                   nop
+147   40BC 00                   nop
+148   40BD 00                   nop
+149   40BE 00                   nop
+150   40BF 00                   nop
+151   40C0
+152   40C0              CLEARRAM:
+153   40C0 3E 00                LD      A,00
+154   40C2 21 20 00             LD      HL,$20
+155   40C5              CLRAMLOOP:
+156   40C5 77                   LD      (HL),a
+157   40C6 23                   INC     HL
+158   40C7 C2 C5 40             JP      NZ,CLRAMLOOP
+159   40CA 76                   HALT
+160   40CB
+161   40CB                      SAVEBIN "Orton3C.rom", $00, $FFFF
+162   40CB
+163   40CB                      ;; after this you need to run truncate -s 128K Orton3C.bin
+164   40CB
+# file closed: Orton3C.asm

@@ -1,0 +1,21 @@
+# file opened: d255-6502-org.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000 00                   NOP
+ 4    0001
+ 5    0001 3A 16 00     RAND8:  LD a,(SEED)     ; get seed
+ 6    0004 E6 B8                and $b8         ; mask non feedback bits
+ 7    0006 37                   scf             ; set carry
+ 8    0007 E2 0B 00             jp PO, NOCLR    ; skip clear if odd
+ 9    000A 3F                   ccf             ; complement carry
+10    000B
+11    000B 3A 16 00     NOCLR:  LD A,(SEED)     ; get seed back
+12    000E 17                   RLA             ; rotate carry into byte
+13    000F 32 16 00             LD (SEED),A     ; save back for next
+14    0012
+15    0012 D3 00        VIEW:   OUT ($00),A
+16    0014 18 FC                JR VIEW
+17    0016
+18    0016 01           SEED:   db 1            ; must be non-zero
+19    0017
+# file closed: d255-6502-org.asm

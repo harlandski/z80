@@ -1,0 +1,30 @@
+# file opened: decadd.asm
+ 1    0000              ; Demonstrate decimal addition with DAA
+ 2    0000
+ 3    0000                DEVICE ZXSPECTRUM48
+ 4    0000
+ 5    0000                org $8000
+ 6    8000
+ 7    8000 C3 05 80       jp start
+ 8    8003
+ 9    8003              ROM_CLS       = $0DAF
+10    8003              FIRSTNUMBER   = $15
+11    8003              SECONDNUMBER  = $27
+12    8003
+13    8003              result:
+14    8003 00 00          dw 0
+15    8005
+16    8005              start:
+17    8005 CD AF 0D       call ROM_CLS
+18    8008 3E 15          ld a,FIRSTNUMBER
+19    800A 06 27          ld b,SECONDNUMBER
+20    800C 80             add b ; right now A = $3C
+21    800D 27             daa ; correct this to $42
+22    800E 21 03 80       ld hl,result
+23    8011 77             ld (hl),a
+24    8012 D7             rst $10 ; expecting $42 which is 'B'. Without DAA it is $3C which is '<'
+25    8013 C9             ret
+26    8014
+27    8014                SAVESNA "decadd.sna", start
+28    8014
+# file closed: decadd.asm

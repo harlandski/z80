@@ -1,0 +1,16 @@
+# file opened: 003-shift-left-two-bits.asm
+ 1    0000              ; shift the contents of memory location X left two bits
+ 2    0000              ; and put the results in X+1
+ 3    0000
+ 4    0000                      org 0
+ 5    0000
+ 6    0000 21 09 00     START:  ld hl,INPUT
+ 7    0003 7E                   ld a,(hl)
+ 8    0004 87                   add a
+ 9    0005 87                   add a
+10    0006 23                   inc hl
+11    0007 77                   ld (hl),a
+12    0008 76                   halt
+13    0009 5D           INPUT:  db $5d
+14    000A
+# file closed: 003-shift-left-two-bits.asm

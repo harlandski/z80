@@ -1,0 +1,33 @@
+# file opened: hellocolour.asm
+ 1    0000                DEVICE ZXSPECTRUM48
+ 2    0000
+ 3    0000                org 32000
+ 4    7D00 C3 10 7D       jp start
+ 5    7D03
+ 6    7D03              ROM_CLS   = $0DAF
+ 7    7D03              ROM_PRINT = $203C
+ 8    7D03              LENGTH    = 13
+ 9    7D03              INK       = $10
+10    7D03              COLOUR    = 6
+11    7D03
+12    7D03              string:
+13    7D03 48 65 6C 6C    db "Hello, World!"
+13    7D07 6F 2C 20 57
+13    7D0B 6F 72 6C 64
+13    7D0F 21
+14    7D10
+15    7D10
+16    7D10              start:
+17    7D10 CD AF 0D       call ROM_CLS
+18    7D13 3E 10          ld a,INK
+19    7D15 D7             rst $10       ; The next character to be printed now will be the ink paramter
+20    7D16 3E 06          ld a,COLOUR
+21    7D18 D7             rst $10
+22    7D19 11 03 7D       ld de, string
+23    7D1C 01 0D 00       ld bc, LENGTH
+24    7D1F CD 3C 20       call ROM_PRINT
+25    7D22 C9             ret
+26    7D23
+27    7D23                SAVESNA "hellocolour.sna", start
+28    7D23
+# file closed: hellocolour.asm
