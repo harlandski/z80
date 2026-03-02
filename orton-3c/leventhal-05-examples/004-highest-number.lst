@@ -1,0 +1,24 @@
+# file opened: 004-highest-number.asm
+ 1    0000              ; Find the largest element in a block of data
+ 2    0000              ; the length of the block is at LENGTH, and the block itself begins at
+ 3    0000              ; LENGTH + 1. St72ore the maxiumum in memory location OUTPUT.
+ 4    0000              ; Assume the numbers in the block are 8 bit unsigned binary numbers
+ 5    0000
+ 6    0000                      org 0
+ 7    0000 00                   nop
+ 8    0001 21 12 00             ld hl,LENGTH
+ 9    0004 46                   ld b,(hl)     ; counter
+10    0005 97                   sub a         ; a = 0
+11    0006 23           NEXTE:  inc hl
+12    0007 BE                   cp (hl)       ; Set flags as if A - (HL)
+13    0008 30 01                jr nc,DECNT   ; if no carry then A >= HL
+14    000A 7E                   ld a,(hl)     ; otherwise HL > A
+15    000B 10 F9        DECNT:  djnz NEXTE
+16    000D 32 11 00             ld (OUTPUT), a
+17    0010 76                   halt
+18    0011 00           OUTPUT: db 0
+19    0012 05           LENGTH: db 05
+20    0013 67 79 15 E3  ITEMS:  db $67, $79, $15, $e3, $72
+20    0017 72
+21    0018
+# file closed: 004-highest-number.asm
