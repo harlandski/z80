@@ -1,0 +1,12 @@
+# file opened: leventhal-ones-complement.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000              INPUT   = $08
+ 4    0000              OUTPUT  = $09
+ 5    0000
+ 6    0000 3A 08 00             LD A,(INPUT)
+ 7    0003 2F                   CPL
+ 8    0004 32 09 00             LD (OUTPUT),A
+ 9    0007 76                   HALT
+10    0008
+# file closed: leventhal-ones-complement.asm

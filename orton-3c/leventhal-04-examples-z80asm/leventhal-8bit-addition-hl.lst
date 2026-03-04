@@ -1,0 +1,14 @@
+# file opened: leventhal-8bit-addition-hl.asm
+ 1    0000                      org 0
+ 2    0000
+ 3    0000              DATA = $09
+ 4    0000
+ 5    0000 21 09 00             LD HL,DATA
+ 6    0003 7E                   LD A,(HL)
+ 7    0004 23                   INC HL
+ 8    0005 86                   ADD A,(HL)
+ 9    0006 23                   INC HL
+10    0007 77                   LD (HL),A
+11    0008 76                   HALT
+12    0009
+# file closed: leventhal-8bit-addition-hl.asm

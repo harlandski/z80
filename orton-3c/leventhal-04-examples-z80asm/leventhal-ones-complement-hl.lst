@@ -1,0 +1,14 @@
+# file opened: leventhal-ones-complement-hl.asm
+ 1    0000                org 0
+ 2    0000
+ 3    0000              INPUT   = $08
+ 4    0000              ;; OUTPUT = $09
+ 5    0000
+ 6    0000 21 08 00       ld hl,INPUT
+ 7    0003 7E             ld a,(hl)
+ 8    0004 2F             CPL
+ 9    0005 23             inc hl
+10    0006 77             ld (hl),a
+11    0007 76             halt
+12    0008
+# file closed: leventhal-ones-complement-hl.asm
