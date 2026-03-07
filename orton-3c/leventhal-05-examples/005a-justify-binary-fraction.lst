@@ -1,0 +1,32 @@
+# file opened: 005a-justify-binary-fraction.asm
+ 1    0000              ; Shift the contents of memory location INPUT left until its most significant
+ 2    0000              ; bit is 1. Store the result in OUTPUT and the number of shifts in SHIFTS.
+ 3    0000
+ 4    0000                      org 0
+ 5    0000
+ 6    0000 00                   nop
+ 7    0001 06 00                ld b,0
+ 8    0003 21 17 00             ld hl, INPUT
+ 9    0006 7E                   ld a, (hl)
+10    0007 A7                   and a ; check status of a without changing it
+11    0008 28 08                jr z, DONE
+12    000A FA 12 00     CHKMS:  jp m, DONE ; if sign bit is negative
+13    000D 04                   inc b
+14    000E 87                   add a,a ; shift left, affecting sign bit
+15    000F C3 0A 00             jp CHKMS
+16    0012 23           DONE:   inc hl
+17    0013 77                   ld (hl), a ; store OUTPUT
+18    0014 23                   inc hl
+19    0015 70                   ld (hl), b; store SHIFTS
+20    0016 76                   halt
+21    0017 22           INPUT:  db $22
+22    0018 00           OUTPUT: db $0
+23    0019 00           SHIFTS: db $0
+24    001A
+25    001A              ; Tests
+26    001A              ; 1) INPUT $22, OUTPUT $88, SHIFTS $02 [ ]
+27    001A              ; 2) INPUT $01, OUTPUT $80, SHIFTS $07 [ ]
+28    001A              ; 3) INPUT $CB, OUTPUT $CB, SHIFTS $00 [ ]
+29    001A              ; 4) INPUT $00, OUTPUT $00, SHIFTS $00 [ ]
+30    001A
+# file closed: 005a-justify-binary-fraction.asm
